@@ -575,6 +575,7 @@ int main() {
           lanes.push_back(lane1);
           lanes.push_back(lane2);
           lanes.push_back(lane3);
+          bool badsensor = false;
           for (int k = 0; k<sensor_fusion.size(); k++) {
             vector<double> vid = sensor_fusion[k];
             double vidx = vid[1]+vid[3]*0.02;
@@ -616,6 +617,7 @@ int main() {
                   lanes[2].push_back(vids);
                 }
               } else {
+                badsensor = true;
                 cout << "<" << vid[0] << ":(" << vid[5] << ":" << vid[6] << "):(" << vidlocal[0] << ":" << vidlocal[1] << "):" << vids << ":" << viddist << ":" << lanestr << ">,";
               }
             } else {
@@ -681,7 +683,7 @@ int main() {
 
           cout << "lane0:" << lane0size << ":" << lane0closest << " lane1:" << lane1size << ":" << lane1closest << " lane2:" << lane2size << ":" << lane2closest << " ourlane:" << ourlane << " bestlane:" << bestlane << endl;
           if (timestep > 50 && ourlane != bestlane) {
-            if ( not lanechange ) {
+            if ( not lanechange and not badsensor ) {
               cout << "ourlane:" << ourlane << " bestlane:" << bestlane << endl;
               nextd = bestlane*4+2;
               lanechange = true;
