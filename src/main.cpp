@@ -195,15 +195,15 @@ vector<vector<double>> getLocalizedWayPointSegement(double car_x, double car_y, 
   if (previous < 0) {
     previous += maps_x.size();
   }
-  cout << "waypoints: ";
+  // cout << "waypoints: ";
   for (int i = 0; i < 25; i++) {
     int next = (previous+i)%maps_x.size();
     vector<double> localxy = getLocalXY(car_x, car_y, theta, (maps_x[next]+d*maps_dx[next]), (maps_y[next]+d*maps_dy[next]));
-    cout << next << ":" << localxy[0] << ":" << localxy[1] << ",";
+    // cout << next << ":" << localxy[0] << ":" << localxy[1] << ",";
     wpx.push_back(localxy[0]);
     wpy.push_back(localxy[1]);
   }
-  cout << endl;
+  // cout << endl;
   results.push_back(wpx);
   results.push_back(wpy);
 
@@ -356,7 +356,7 @@ int main() {
   // The max s value before wrapping around the track back to 0
   double nextd = 6.;
   // max speed ~ 49.75MPH
-  double inc_max = 0.4425;
+  const double inc_max = 0.445;
   double dist_inc = inc_max;
   int timestep = 0;
   int stucktimer = 0;
@@ -649,6 +649,18 @@ int main() {
             sensor_fusion[k].push_back(vids);
             sensor_fusion[k].push_back(distance(0,0,vid[3],vid[4])*0.02);
             sensor_fusion[k].push_back(round(round(vidd-2)/4));
+
+            // fast vehicle - adjust
+            if (smooth_speed(0.) < dist_inc) {
+              if (smooth_speed(0.) < vid[8]) {
+                vids += (vid[8]-smooth_speed(0.))*120.;
+              }
+            } else {
+              if (dist_inc < vid[8]) {
+                vids += (vid[8]-dist_inc)*240.;
+              }
+            }
+
             string lanestr = "error";
             if (vids > 0.) {
               if (vidd < 12. && vidd > 0.) {
@@ -703,16 +715,20 @@ int main() {
               if (newlane < 0 && ourlane != lane && abs(ourlane-lane)==1) {
                 newlane = lane;
                 for (int i=0; i<sensor_fusion.size(); i++) {
-                  vector<double> vid = sensor_fusion[i];
-                  if (vid[7] == lanes[newlane][0] && (lanes[newlane][0] > 15 || lanes[newlane][0] < 5)) {
-                    lanes[ourlane][0] = lanes[newlane][0]-1;
+                  vector<double> oldvid = sensor_fusion[i];
+                  vector<double> vid;
+                  if (oldvid[7] == lanes[newlane][0] && (lanes[newlane][0] > 15 || lanes[newlane][0] < 5)) {
+                    lanes[ourlane][0] = lanes[newlane][0]-1.;
+                    for (int j=0; j<oldvid.size(); j++) {
+                      vid.push_back(oldvid[j]);
+                    }
                     vid[7] = lanes[ourlane][0];
                     vid[9] = double(ourlane);
                     sensor_fusion.push_back(vid);
                     cout << "create virual car from lane: " << newlane << " at: " << vid[7] << endl;
                   } else {
                     stucktimer = 0;
-                    cout << "Too close to create virual car from lane: " << newlane << " at: " << vid[7] << endl;
+                    cout << "Too close to create virual car from lane: " << newlane << " at: " << oldvid[7] << endl;
                   }
                 }
               }
@@ -807,7 +823,7 @@ int main() {
           }
 
           // no good way out - the other vehicle is too near - slow down
-          if (lanes[ourlane].size() > 0 && lanes[ourlane][0] < 40. && lanes[ourlane][0] > 5.) {
+          if (lanes[ourlane].size() > 0 && lanes[ourlane][0] < 50. && lanes[ourlane][0] > 5.) {
             // no stuck timer if we are in the middle lane.
             if (ourlane != 1) {
               stucktimer++;
@@ -816,11 +832,11 @@ int main() {
             for (int i=0; i<sensor_fusion.size(); i++) {
               vector<double> vid = sensor_fusion[i];
               cout << i << " comparing: " << vid[7] <<":" << vid[9] << " with " << lanes[ourlane][0] << "(" << vid[3] << ":" << vid[4] << ":" << vid[8] << ")" << endl;
-              if (vid[7] == lanes[ourlane][0] && vid[9] == ourlane) {
+              if (vid[7] == lanes[ourlane][0] && vid[9] == ourlane && (lanes[ourlane][0] < 40 || (lanes[ourlane][0] < 50 && vid[8] < 0.3))) {
                 // follow vehicle
-                if (vid[8] > 0.1) {
+                if (vid[8] > 0.25) {
                   if (dist_inc >= vid[8]) {
-                    // vehicle is slower than us... or closer than 20 meters away gradural decelerate to its speed
+                    // vehicle is slower than us... or closer than 50 meters away gradural decelerate to its speed
                     dist_inc = vid[8]*0.95;
                     cout << "decelerating: setting speed spacing to: " << dist_inc << endl;
                   } else {
@@ -831,7 +847,6 @@ int main() {
                       cout << "accelerating: setting speed spacing to: " << dist_inc << endl;
                     }
                   }
-                // disabled vehicle
                 } else {
                   cout << "disabled vehicle!" << endl;
                   dist_inc = 0.1;
@@ -842,17 +857,33 @@ int main() {
           } else {
             // slowly increase speed to avoid max acceleration...
             if (dist_inc < inc_max && not lanechange) {
-              double interval = inc_max - dist_inc;
-              if (interval > 0.15) {
-                dist_inc = dist_inc + interval/5.;
-                cout << "No vehicle: setting speed spacing to: " << dist_inc << endl;
-              } else {
-                if (interval > 0.1) {
-                  dist_inc = dist_inc + interval/3.;
+              double interval = inc_max - smooth_speed(0.);
+              if (interval > 0.3) {
+                double inc1 = (smooth_speed(0.)*9. + inc_max)/10.;
+                double inc2 = (dist_inc*9. + inc_max)/10.;
+                if (inc1 > dist_inc && inc1 < inc2) {
+                  dist_inc = inc1;
                 } else {
-                  dist_inc = (dist_inc + inc_max)/2.;
+                  dist_inc = inc2;
+                }
+              } else if (interval > 0.2) {
+                double inc1 = (smooth_speed(0.)*7. + inc_max)/8.;
+                double inc2 = (dist_inc*7. + inc_max)/8.;
+                if (inc1 > dist_inc && inc1 < inc2) {
+                  dist_inc = inc1;
+                } else {
+                  dist_inc = inc2;
+                }
+              } else {
+                double inc1 = (smooth_speed(0.)*5. + inc_max)/6.;
+                double inc2 = (dist_inc*5. + inc_max)/6.;
+                if (inc1 > dist_inc && inc1 < inc2) {
+                  dist_inc = inc1;
+                } else {
+                  dist_inc = inc2;
                 }
               }
+              cout << "No vehicle within range! interval: " << interval << " setting speed spacing to: " << dist_inc << endl;
             }
           }
 
