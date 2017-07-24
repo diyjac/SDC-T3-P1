@@ -45,7 +45,7 @@ As part of the path planner, we output a log of the planned path to [data/logger
 ## Fastest Lap
 Using this path planner, our best lap time around the track for 4.32 Miles was 5 minutes 18 seconds from 0MPH as can be seen in the YouTube video below.  This is the same trace as the graphs shown above and in the Jupyter notebook.
 
-[!![Fastest Lap - 5 minutes 18 seconds](images/BestLapTime-518.png)](https://youtu.be/Em3V2wy5hek)
+[![Fastest Lap - 5 minutes 18 seconds](images/BestLapTime-518.png)](https://youtu.be/Em3V2wy5hek)
 
 ## Longest Distance/Time without Incident
 We were able to drive the simulated car around the track for 46.01 Miles/58 minutes and 29 seconds (More than 10 laps around the track.)  Unfortunately, the video is too large to upload.
