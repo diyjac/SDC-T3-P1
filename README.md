@@ -48,9 +48,9 @@ Using this path planner, our best lap time around the track for 4.32 Miles was 5
 [![Fastest Lap - 5 minutes 18 seconds](images/BestLapTime-518.png)](https://youtu.be/Em3V2wy5hek)
 
 ## Longest Distance/Time without Incident
-We were able to drive the simulated car around the track for 46.01 Miles/58 minutes and 29 seconds (More than 10 laps around the track.)  Unfortunately, the video is too large to upload.
+We were able to drive the simulated car around the track for 46.01 Miles/58 minutes and 29 seconds, more than 10 laps around the track.  Unfortunately, the video is too large to upload in its entirety, so we trimmed the video to the last 2 minutes 30 seconds of the capture for your enjoyment.
 
-![46.01 Miles without Incident](images/46.01Miles.png)
+[![46.01 Miles without Incident](images/46.01Miles.png)](https://youtu.be/2IvvS1XEGO4)
 
 
 ## Installation
