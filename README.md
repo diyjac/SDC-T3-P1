@@ -59,7 +59,7 @@ The latest term 3 simulator (v1.2) can be downloaded from  [https://github.com/u
 
 ## Basic Build Instructions
 
-**NOTE: Please make if you rerun the cmake, to use the `-DCMAKE_BUILD_TYPE=RelWithDebInfo`!  This will make the spline.h anonymous namespace referenceable.**
+**NOTE: Please make sure if you rerun the cmake, to use the `-DCMAKE_BUILD_TYPE=RelWithDebInfo` flag!  This will make the spline.h anonymous namespace referenceable.**
 
 1. Clone this repo.
 2. Change to the build directory: `cd build`
