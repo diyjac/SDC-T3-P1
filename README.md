@@ -62,11 +62,11 @@ The latest term 3 simulator (v1.2) can be downloaded from  [https://github.com/u
 **
 NOTE: Please make sure if you rerun the cmake, to use the `-DCMAKE_BUILD_TYPE=RelWithDebInfo` flag!  This will make the spline.h anonymous namespace referenceable.
 Otherwise, the path_planning executable will generate an error from the spline.h file, since it it referenced multiple time within main.cpp:
+**
 ```
 path_planning: /home/jchen/SDCND/SDC-T3-P1/src/spline.h:288: void {anonymous}::tk::spline::set_points(const std::vector<double>&, const std::vector<double>&, bool): Assertion `x.size()==y.size()' failed.
 Aborted (core dumped)
 ```
-**
 
 1. Clone this repo.
 2. Change to the build directory: `cd build`
